@@ -8,8 +8,11 @@ from keras.layers import LSTM
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 import math
+import sys
 
 from byte_converter import *
+
+# import pdb
 
 
 
@@ -19,7 +22,7 @@ np.random.seed(7)
 
 # open our .wav file and save it as audio_input 
 # audio_input = wave.open('chromescale2-24.wav', 'rb')
-audio_input = wave.open('blip.wav', 'rb')
+audio_input = wave.open(sys.argv[1], 'rb')
 
 # instantiate an empty list
 audio_dataset = list()
@@ -43,8 +46,11 @@ audio_dataset = scaler.fit_transform(audio_dataset)
 # print(audio_dataset)
 # print(type(audio_dataset))
 
+# pdb.set_trace()
 
-train_size = int(len(audio_dataset) * 0.75)
+
+
+train_size = int(len(audio_dataset) * 0.5)
 test_size = len(audio_dataset) - train_size
 train, test = audio_dataset[0:train_size,:], audio_dataset[train_size:len(audio_dataset),:]
 # print(len(train), len(test))
@@ -100,7 +106,7 @@ testX = np.reshape(testX, (testX.shape[0], 1, testX.shape[1]))
 
 model = Sequential()
 
-model.add(LSTM(32, input_dim=look_back))
+model.add(LSTM(16, input_dim=look_back))
 
 model.add(Dense(1))
 
@@ -144,34 +150,46 @@ testY = scaler.inverse_transform(testY)
 
 
 
-# shift train predictions for plotting
-train_predict_plot = np.empty_like(audio_dataset)
-train_predict_plot[:, :] = np.nan
-train_predict_plot[look_back:len(train_predict)+look_back, :] = train_predict
-# shift test predictions for plotting
-test_predict_plot = np.empty_like(audio_dataset)
-test_predict_plot[:, :] = np.nan
-test_predict_plot[len(train_predict)+(look_back*2)+1:len(audio_dataset)-1, :] = test_predict
-# plot baseline and predictions
-plt.plot(scaler.inverse_transform(audio_dataset))
-plt.plot(train_predict_plot)
-plt.plot(test_predict_plot)
-plt.show()
+# # shift train predictions for plotting
+# train_predict_plot = np.empty_like(audio_dataset)
+# train_predict_plot[:, :] = np.nan
+# train_predict_plot[look_back:len(train_predict)+look_back, :] = train_predict
+# # shift test predictions for plotting
+# test_predict_plot = np.empty_like(audio_dataset)
+# test_predict_plot[:, :] = np.nan
+# test_predict_plot[len(train_predict)+(look_back*2)+1:len(audio_dataset)-1, :] = test_predict
+# # plot baseline and predictions
+# plt.plot(scaler.inverse_transform(audio_dataset))
+# plt.plot(train_predict_plot)
+# plt.plot(test_predict_plot)
+# plt.show()
 
 
 
-audio_output = wave.open('sample1.wav', 'wb')
+audio_output = wave.open('debugged_output.wav', 'wb')
 
 audio_output.setparams(audio_input.getparams())
 # audio_output.setnframes(len(train_predict) + len(test_predict))
 
 
-for i in range(len(train_predict)):
+train_predict_int = train_predict.astype(int)
+test_predict_int = test_predict.astype(int)
+width = audio_output.getsampwidth()
 
-	audio_output.writeframes(int_to_bytes(train_predict.astype(int)[i][0], audio_output.getsampwidth()))
+print(train_predict_int)
+print(test_predict_int)
+
+
+
+for i in range(len(train_predict)):
+	train_predict_bytes = int_to_bytes(train_predict_int[i][0],width)
+	# print((train_predict_bytes))
+	audio_output.writeframes(train_predict_bytes)
 
 for i in range(len(test_predict)):
-	audio_output.writeframes(int_to_bytes(test_predict.astype(int)[i][0], audio_output.getsampwidth()))
+	test_predict_bytes = int_to_bytes(test_predict_int[i][0], width)
+	# print((train_predict_bytes))
+	audio_output.writeframes(test_predict_bytes)
 
 
 audio_output.close()
