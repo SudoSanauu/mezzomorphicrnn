@@ -2,9 +2,9 @@ import numpy as np
 import wave
 # import scipy
 # import matplotlib.pyplot as matplot
-# from keras.models import Sequential
-# from keras.layers import Dense
-# from keras.layers import LSTM
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import LSTM
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 
@@ -57,7 +57,6 @@ def create_dataset(input_dataset, look_back=1):
 
 look_back = 1
 trainX, trainY = create_dataset(train, look_back)
-testX, testY = create_dataset(test, look_back)
 
 
 # print("TrainX: ")
@@ -72,6 +71,8 @@ testX, testY = create_dataset(test, look_back)
 # print(len(trainY))
 # print(np.shape(trainY))
 
+testX, testY = create_dataset(test, look_back)
+
 # print("TestX: ")
 # print(trainX)
 # print(type(trainX))
@@ -85,3 +86,23 @@ testX, testY = create_dataset(test, look_back)
 # print(np.shape(trainY))
 
 
+trainX = np.reshape(trainX, (trainX.shape[0], 1, trainX.shape[1]))
+testX = np.reshape(testX, (testX.shape[0], 1, testX.shape[1]))
+
+print("TrainX: ")
+print(trainX)
+print("TestX: ")
+print(testX)
+
+
+
+model = Sequential()
+
+model.add(LSTM(32, input_dim=look_back))
+
+model.add(Dense(1))
+
+# CHECK WHAT OPTIMIZER MEANS
+model.compile(loss='mean_squared_error', optimizer='adam',metrics=['accuracy'])
+
+model.fit(trainX, trainY, nb_epoch=100, batch_size=1, verbose=1)
