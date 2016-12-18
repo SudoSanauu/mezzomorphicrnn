@@ -1,7 +1,7 @@
 import numpy as np
 import wave
 import scipy
-import matplotlib.pyplot as plot
+import matplotlib.pyplot as plt
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
@@ -11,7 +11,16 @@ import math
 
 
 def byte_to_float(input_byte):
-	return float(input_byte[0])
+	return float(ord(input_byte))
+
+def float_to_byte(input_float):
+	# print(input_float)
+	if round(input_float) > 255:
+		return bytes([255])
+	elif round(input_float) < 0:
+		return bytes([0])
+	else:
+		return bytes([round(input_float)])
 
 
 
@@ -19,16 +28,17 @@ def byte_to_float(input_byte):
 # set random seed
 np.random.seed(7)
 
-# open our .wav file and save it as audio_io 
-audio_io = wave.open('blip.wav', 'rb')
+# open our .wav file and save it as audio_input 
+audio_input = wave.open('blip.wav', 'rb')
 
 # instantiate an empty list
 audio_dataset = list()
 
 # append all of our bytes to the list audio_dataset
-for i in range(audio_io.getnframes()):
-	current_frame = byte_to_float(audio_io.readframes(1))
+for i in range(audio_input.getnframes()):
+	current_frame = byte_to_float(audio_input.readframes(1))
 	audio_dataset.append([current_frame])
+
 
 # print(audio_dataset)
 # print(type(audio_dataset))
@@ -116,6 +126,7 @@ test_predict = model.predict(testX)
 # print("test_predict")
 # print(test_predict)
 
+# unscale our data so that we can transform them back into bytes
 train_predict = scaler.inverse_transform(train_predict)
 trainY = scaler.inverse_transform(trainY)
 test_predict = scaler.inverse_transform(test_predict)
@@ -155,3 +166,21 @@ plt.plot(scaler.inverse_transform(audio_dataset))
 plt.plot(train_predict_plot)
 plt.plot(test_predict_plot)
 plt.show()
+
+
+
+audio_output = wave.open('sample1.wav', 'wb')
+
+audio_output.setparams(audio_input.getparams())
+# audio_output.setnframes(len(train_predict) + len(test_predict))
+
+
+for i in range(len(train_predict)):
+	audio_output.writeframes(float_to_byte(train_predict.astype(int)[i][0]))
+
+for i in range(len(test_predict)):
+	audio_output.writeframes(float_to_byte(test_predict.astype(int)[i][0]))
+
+
+audio_output.close()
+audio_input.close()
