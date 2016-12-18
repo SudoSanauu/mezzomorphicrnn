@@ -10,4 +10,13 @@ def bytes_to_int(input_bytes):
 
 	return final_value
 
+def int_to_bytes(input_int, width):
+	int_array = []
+	value = input_int
+	for n in range(width-1, -1 , -1):
+		print(n)
+		int_array.append(input_int // (256 ** n))
+		value = value % (256 ** n)
+
+	return bytes(int_array)
 
