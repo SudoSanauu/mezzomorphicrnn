@@ -9,18 +9,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 import math
 
-
-def byte_to_float(input_byte):
-	return float(ord(input_byte))
-
-def float_to_byte(input_float):
-	# print(input_float)
-	if round(input_float) > 255:
-		return bytes([255])
-	elif round(input_float) < 0:
-		return bytes([0])
-	else:
-		return bytes([round(input_float)])
+from byte_converter import *
 
 
 
@@ -29,6 +18,7 @@ def float_to_byte(input_float):
 np.random.seed(7)
 
 # open our .wav file and save it as audio_input 
+# audio_input = wave.open('chromescale2-24.wav', 'rb')
 audio_input = wave.open('blip.wav', 'rb')
 
 # instantiate an empty list
@@ -36,7 +26,8 @@ audio_dataset = list()
 
 # append all of our bytes to the list audio_dataset
 for i in range(audio_input.getnframes()):
-	current_frame = byte_to_float(audio_input.readframes(1))
+	current_frame = audio_input.readframes(1)
+	current_frame = bytes_to_int(current_frame)
 	audio_dataset.append([current_frame])
 
 
@@ -176,10 +167,11 @@ audio_output.setparams(audio_input.getparams())
 
 
 for i in range(len(train_predict)):
-	audio_output.writeframes(float_to_byte(train_predict.astype(int)[i][0]))
+
+	audio_output.writeframes(int_to_bytes(train_predict.astype(int)[i][0], audio_output.getsampwidth()))
 
 for i in range(len(test_predict)):
-	audio_output.writeframes(float_to_byte(test_predict.astype(int)[i][0]))
+	audio_output.writeframes(int_to_bytes(test_predict.astype(int)[i][0], audio_output.getsampwidth()))
 
 
 audio_output.close()
