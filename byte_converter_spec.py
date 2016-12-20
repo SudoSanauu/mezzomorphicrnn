@@ -2,6 +2,7 @@ import unittest
 from byte_converter import *
 
 class ByteConverterTestCase(unittest.TestCase):
+	
 	#testing bytes to int
 	#error if no bytes
 	def test_expect_bytes(self):
