@@ -1,4 +1,7 @@
 def bytes_to_int(input_bytes):
+	if type(input_bytes) != type(b''):
+		raise TypeError('expecting bytes')
+
 	int_array = []
 	for index in range(len(input_bytes)):
 		int_array.append(input_bytes[index])
@@ -10,6 +13,9 @@ def bytes_to_int(input_bytes):
 	return final_value
 
 def int_to_bytes(input_int, width):
+	if input_int >= 256**width:
+		raise ValueError('number too big for width')
+
 	int_array = []
 	value = input_int
 	for n in range(width-1, -1 , -1):
