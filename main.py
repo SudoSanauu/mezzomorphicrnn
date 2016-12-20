@@ -56,34 +56,30 @@ train_input, train_comparison = create_dataset(train, look_back)
 #create testing dataset
 test_input, test_comparison = create_dataset(test, look_back)
 
+#reshaping train_input
 train_input = np.reshape(train_input, (train_input.shape[0], 1, train_input.shape[1]))
+
+#reshaping test input
 test_input = np.reshape(test_input, (test_input.shape[0], 1, test_input.shape[1]))
 
-# print("TrainX: ")
-# print(train_input)
-# print("TestX: ")
-# print(test_input)
-
-
-
+#create an empty model
 model = Sequential()
 
+#add a LSTM layer to our model
 model.add(LSTM(16, input_dim=look_back))
 
+#add output layer
 model.add(Dense(1))
 
-# CHECK WHAT OPTIMIZER MEANS
+#compile model with adam optimizer
 model.compile(loss='mean_squared_error', optimizer='adam',metrics=['accuracy'])
 
+#train model on train_input
 model.fit(train_input, train_comparison, nb_epoch=1, batch_size=1, verbose=1)
 
+#use model to predict for training and testing data
 train_predict = model.predict(train_input)
 test_predict = model.predict(test_input)
-
-# print("train_predict")
-# print(train_predict)
-# print("test_predict")
-# print(test_predict)
 
 # unscale our data so that we can transform them back into bytes
 train_predict = scaler.inverse_transform(train_predict)
@@ -91,30 +87,20 @@ train_comparison = scaler.inverse_transform(train_comparison)
 test_predict = scaler.inverse_transform(test_predict)
 test_comparison = scaler.inverse_transform(test_comparison)
 
-# print("train_predict")
-# print(train_predict)
-# print("test_predict")
-# print(test_predict)
-
-# print("train_comparison[0]: ")
-# print(train_comparison[0])
-
-# train_score = math.sqrt(mean_squared_error(train_comparison[0], train_predict[:,0]))
-# print('Train Score: %.2f RMSE' % (train_score))
-# test_score = math.sqrt(mean_squared_error(test_comparison[0], test_predict[:,0]))
-# print('Train Score: %.2f RMSE' % (test_score))
-
-if len(argv) >= 3:
-	audio_output = wave.open(argv[2], 'wb')
+#if user inputs filename, exec, otherwise, default output_file.wav
+if len(sys.argv) >= 3:
+	audio_output = wave.open(sys.argv[2], 'wb')
 else:
 	audio_output = wave.open('output_file.wav', 'wb')
 
-
+#ensure output file is same format as input file
 audio_output.setparams(audio_input.getparams())
 # audio_output.setnframes(len(train_predict) + len(test_predict))
 
+#write train and test to file
 write_data(audio_output,train_predict)
 write_data(audio_output,test_predict)
 
+#close audio files
 audio_output.close()
 audio_input.close()
