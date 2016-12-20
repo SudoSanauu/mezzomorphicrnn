@@ -11,6 +11,7 @@ import math
 import sys
 
 from byte_converter import *
+from io_helper import *
 
 # import pdb
 
@@ -24,15 +25,8 @@ np.random.seed(7)
 # audio_input = wave.open('chromescale2-24.wav', 'rb')
 audio_input = wave.open(sys.argv[1], 'rb')
 
-# instantiate an empty list
-audio_dataset = list()
-
 # append all of our bytes to the list audio_dataset
-for i in range(audio_input.getnframes()):
-	current_frame = audio_input.readframes(1)
-	current_frame = bytes_to_int(current_frame)
-	audio_dataset.append([current_frame])
-
+audio_dataset = get_data(audio_input)
 
 # print(audio_dataset)
 # print(type(audio_dataset))
@@ -171,25 +165,28 @@ audio_output = wave.open('debugged_output.wav', 'wb')
 audio_output.setparams(audio_input.getparams())
 # audio_output.setnframes(len(train_predict) + len(test_predict))
 
-
-train_predict_int = train_predict.astype(int)
-test_predict_int = test_predict.astype(int)
-width = audio_output.getsampwidth()
-
-print(train_predict_int)
-print(test_predict_int)
+write_data(audio_output,train_predict)
+write_data(audio_output,test_predict)
 
 
+# train_predict_int = train_predict.astype(int)
+# test_predict_int = test_predict.astype(int)
+# width = audio_output.getsampwidth()
 
-for i in range(len(train_predict)):
-	train_predict_bytes = int_to_bytes(train_predict_int[i][0],width)
-	# print((train_predict_bytes))
-	audio_output.writeframes(train_predict_bytes)
+# print(train_predict_int)
+# print(test_predict_int)
 
-for i in range(len(test_predict)):
-	test_predict_bytes = int_to_bytes(test_predict_int[i][0], width)
-	# print((train_predict_bytes))
-	audio_output.writeframes(test_predict_bytes)
+
+
+# for i in range(len(train_predict)):
+# 	train_predict_bytes = int_to_bytes(train_predict_int[i][0],width)
+# 	# print((train_predict_bytes))
+# 	audio_output.writeframes(train_predict_bytes)
+
+# for i in range(len(test_predict)):
+# 	test_predict_bytes = int_to_bytes(test_predict_int[i][0], width)
+# 	# print((train_predict_bytes))
+# 	audio_output.writeframes(test_predict_bytes)
 
 
 audio_output.close()
