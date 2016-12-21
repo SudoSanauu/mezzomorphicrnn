@@ -18,16 +18,13 @@ np.random.seed(7)
 
 # open our .wav file and save it as audio_input 
 # audio_input = wave.open('chromescale2-24.wav', 'rb')
-audio_input = wave.open(sys.argv[1], 'rb')
+audio_inputs = select_files(sys.argv[1])
 
 # append all of our bytes to the list audio_dataset
-audio_dataset = get_data(audio_input)
+audio_datasets = files_to_data(audio_inputs)
 
 # set our scaling function to normalize dataset
-scaler = MinMaxScaler(feature_range=(0,1))
-
 #Take audio_dataset and fit it to our Sigmoid function
-audio_dataset = scaler.fit_transform(audio_dataset)
 
 #set the size of the dataset we're training on
 train_size = int(len(audio_dataset) * 0.5)
