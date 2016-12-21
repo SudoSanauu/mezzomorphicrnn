@@ -21,56 +21,37 @@ np.random.seed(7)
 audio_inputs = select_files(sys.argv[1])
 
 # append all of our bytes to the list audio_dataset
-audio_datasets = files_to_data(audio_inputs)
+input_datasets, comparison_datasets = files_to_data(audio_inputs)
 
 # set our scaling function to normalize dataset
 #Take audio_dataset and fit it to our Sigmoid function
-
 #set the size of the dataset we're training on
-train_size = int(len(audio_dataset) * 0.5)
-
 #set the size of the dataset we're testing on
-test_size = len(audio_dataset) - train_size
-
 #create training and testing sections into our dataset
-train, test = audio_dataset[0:train_size,:], audio_dataset[train_size:len(audio_dataset),:]
-
 #create dataset method that takes in input dataset and creates a base and expected values
-def create_dataset(input_dataset, look_back=1):
-	input_squence, comparison_sequence = [], []
-	for i in range(len(input_dataset)-look_back-1):
-		next_input = input_dataset[i:i+look_back, 0]
-		input_squence.append(next_input)
-		comparison_sequence.append(input_dataset[i+look_back, 0])
-	return np.array(input_squence), np.array(comparison_sequence)
 
 #n data points at a time
 look_back = 1
 
 #create training dataset
-train_input, train_comparison = create_dataset(train, look_back)
-
 #create testing dataset
-test_input, test_comparison = create_dataset(test, look_back)
-
 #reshaping train_input
-train_input = np.reshape(train_input, (train_input.shape[0], 1, train_input.shape[1]))
-
+input_datasets = reshape_datasets(input_datasets)
 #reshaping test input
-test_input = np.reshape(test_input, (test_input.shape[0], 1, test_input.shape[1]))
 
 #create an empty model
 model = Sequential()
-
 #add a LSTM layer to our model
 model.add(LSTM(16, input_dim=look_back))
-
 #add output layer
 model.add(Dense(1))
-
 #compile model with adam optimizer
 model.compile(loss='mean_squared_error', optimizer='adam',metrics=['accuracy'])
 
+def train_datasets(reshaped_datasets, model):
+  np.random.shuffle(reshaped_datasets)
+  for i in range(len(reshaped_datasets)):
+    model.fit()
 #train model on train_input
 model.fit(train_input, train_comparison, nb_epoch=1, batch_size=1, verbose=1)
 

@@ -40,14 +40,33 @@ def select_files(input_path):
 # method taks list of audio inputs and wave.opens 
 # each file transform data to matricies
 def files_to_data(file_list):
-	data_array = []
+	input_array = []
+	comparison_array = []
 	for i in range(len(file_list)): 
 		current_file = wave.open(file_list[i], "rb")
 		audio_dataset = get_data(current_file)
 		scaler = MinMaxScaler(feature_range=(0,1))
 		audio_dataset = scaler.fit_transform(audio_dataset)
-		data_array.append(audio_dataset)
+		input_data, comparison_data = create_dataset(audio_dataset)
+		input_array.append(input_data)
+		comparison_array.append(comparison_data)
 		current_file.close()
-	return data_array
+	return input_array, comparison_array
+
+def create_dataset(input_dataset, look_back=1):
+	input_squence, comparison_sequence = [], []
+	for i in range(len(input_dataset)-look_back-1):
+		next_input = input_dataset[i:i+look_back, 0]
+		input_squence.append(next_input)
+		comparison_sequence.append(input_dataset[i+look_back, 0])
+	return np.array(input_squence), np.array(comparison_sequence)
+
+def reshape_datasets(input_datasets):
+	reshaped_datasets = []
+	for i in range(len(input_datasets)):
+		reshaped_datasets.append( np.reshape(input_datasets[i], (input_datasets[i].shape[0], 1, input_datasets[i].shape[0])))
+	return reshaped_datasets
+
+#training model randomizes data_set and trains each one
 
 
