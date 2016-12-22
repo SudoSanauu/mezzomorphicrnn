@@ -1,7 +1,6 @@
 import numpy as np
 import wave
 import scipy
-import matplotlib.pyplot as plt
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
@@ -9,6 +8,8 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 import math
 import sys
+from random import randint
+
 
 from byte_converter import *
 from io_helper import *
@@ -16,12 +17,41 @@ from io_helper import *
 # set random seed
 np.random.seed(7)
 
-# open our .wav file and save it as audio_input 
+# open our .wav file and save it as audio_input
 # audio_input = wave.open('chromescale2-24.wav', 'rb')
 audio_input = wave.open(sys.argv[1], 'rb')
 
+# instantiate an empty list
+audio_dataset = list()
+unique_bytes = list()
+
 # append all of our bytes to the list audio_dataset
-audio_dataset = get_data(audio_input)
+for i in range(audio_input.getnframes()):
+	current_frame = audio_input.readframes(1)
+	unique_bytes.append(current_frame)
+	current_frame = bytes_to_int(current_frame)
+	audio_dataset.append([current_frame])
+
+# build a unique byte set and initiate conversion dicts
+byte_set = sorted(list(set(unique_bytes)))
+byte_to_int = dict()
+int_to_byte = dict()
+
+# build conversion dicts
+count = 0
+for i in byte_set:
+	byte_to_int[byte_set[count]] = bytes_to_int(byte_set[count])
+	int_to_byte[bytes_to_int(byte_set[count])] = byte_set[count]
+	count+=1
+
+# find our song length and number of "notes"
+n_bytes = len(audio_dataset)
+n_notes = len(byte_set)
+print ("Total Bytes: ", n_bytes)
+print ("Total 'Notes': ", n_notes)
+
+# append all of our bytes to the list audio_dataset
+# audio_dataset = get_data(audio_input)
 
 # set our scaling function to normalize dataset
 scaler = MinMaxScaler(feature_range=(0,1))
@@ -48,7 +78,7 @@ def create_dataset(input_dataset, look_back=1):
 	return np.array(input_squence), np.array(comparison_sequence)
 
 #n data points at a time
-look_back = 1
+look_back = 500
 
 #create training dataset
 train_input, train_comparison = create_dataset(train, look_back)
@@ -66,7 +96,7 @@ test_input = np.reshape(test_input, (test_input.shape[0], 1, test_input.shape[1]
 model = Sequential()
 
 #add a LSTM layer to our model
-model.add(LSTM(16, input_dim=look_back))
+model.add(LSTM(256, input_dim=look_back, dropout_U = .4 ,dropout_W = .4))
 
 #add output layer
 model.add(Dense(1))
@@ -97,9 +127,40 @@ else:
 audio_output.setparams(audio_input.getparams())
 # audio_output.setnframes(len(train_predict) + len(test_predict))
 
+# pick random starting "note"
+random_dataset = list()
+for i in range(look_back+5):
+	note = byte_to_int[byte_set[randint(0,len(byte_set)-1)]]
+	random_dataset.append([note])
+
+generator = scaler.fit_transform(random_dataset)
+width = audio_output.getsampwidth()
+
+# range is equal to length of song output
+for i in range(1000):
+	# Build Dataset
+	generator = scaler.fit_transform(generator)
+	generatedX, generatedY = create_dataset(generator, look_back)
+	# Scale Dataset
+	# Reshape Dataset for consumption
+	generatedX = np.reshape(generatedX, (generatedX.shape[0], 1, generatedX.shape[1]))
+	# predict next value
+	prediction = model.predict(generatedX, verbose=0)
+	#grab the predicted value
+	predicted = prediction[0][0]
+	#append the predicted value
+	generator = np.append(generator, [[predicted]], axis=0)
+	#get the result
+	result = predicted*(256**audio_input.getsampwidth())
+	#write the next frame based on the result
+	audio_output.writeframes(int_to_bytes(int(result), audio_input.getsampwidth()))
+	#generator for input now equals everthing from 1 after the start value to the new value
+	generator = generator[1:len(generator)]
+print ("\nDone.")
+
 #write train and test to file
-write_data(audio_output,train_predict)
-write_data(audio_output,test_predict)
+# write_data(audio_output,train_predict)
+# write_data(audio_output,test_predict)
 
 #close audio files
 audio_output.close()
