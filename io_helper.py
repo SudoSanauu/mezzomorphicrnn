@@ -39,19 +39,25 @@ def select_files(input_path):
 
 # method taks list of audio inputs and wave.opens 
 # each file transform data to matricies
+#[id1, id2, id3]
+#[cd1, cd2, cd3]
+#[{'id': id1, 'cd': cd1, 'sc': sc1}, {'id': id2, 'cd': cd2,  'sc': sc2}]
 def files_to_data(file_list):
-	input_array = []
-	comparison_array = []
+	data_dictionary_array = []
 	for i in range(len(file_list)): 
+		data_dictionary = dict()
 		current_file = wave.open(file_list[i], "rb")
 		audio_dataset = get_data(current_file)
 		scaler = MinMaxScaler(feature_range=(0,1))
-		audio_dataset = scaler.fit_transform(audio_dataset)
+		data_dictionary['scaler'] = scaler
+		audio_dataset = data_dictionary['scaler'].fit_transform(audio_dataset)
 		input_data, comparison_data = create_dataset(audio_dataset)
-		input_array.append(input_data)
-		comparison_array.append(comparison_data)
+		data_dictionary['input_dataset'] = input_data
+		data_dictionary['comparison_dataset'] = comparison_data
+		data_dictionary['file_params'] = current_file.getparams() 
+		data_dictionary_array.append(data_dictionary)
 		current_file.close()
-	return input_array, comparison_array
+	return data_dictionary_array
 
 def create_dataset(input_dataset, look_back=1):
 	input_squence, comparison_sequence = [], []
@@ -61,12 +67,10 @@ def create_dataset(input_dataset, look_back=1):
 		comparison_sequence.append(input_dataset[i+look_back, 0])
 	return np.array(input_squence), np.array(comparison_sequence)
 
-def reshape_datasets(input_datasets):
-	reshaped_datasets = []
-	for i in range(len(input_datasets)):
-		reshaped_datasets.append( np.reshape(input_datasets[i], (input_datasets[i].shape[0], 1, input_datasets[i].shape[0])))
-	return reshaped_datasets
-
+def reshape_datasets(all_datasets):
+	for i in range(len(all_datasets)):
+		all_datasets[i]['input_dataset'] = np.reshape(all_datasets[i]['input_dataset'], (all_datasets[i]['input_dataset'].shape[0], 1, all_datasets[i]['input_dataset'].shape[1]))
+	return all_datasets
 #training model randomizes data_set and trains each one
 
 
