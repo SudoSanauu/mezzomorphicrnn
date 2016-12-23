@@ -14,9 +14,9 @@ from io_helper import *
 np.random.seed(7)
 
 #n data points at a time
-look_back = 512
+look_back = 256
 
-# open our .wav file and save it as audio_input 
+# open our .wav file and save it as audio_input
 # audio_input = wave.open('chromescale2-24.wav', 'rb')
 audio_inputs = select_files(sys.argv[1])
 
@@ -55,12 +55,12 @@ model.compile(loss='mean_squared_error', optimizer='adam',metrics=['accuracy'])
 # print(all_datasets[1]['input_dataset'].shape)
 
 #train model on train_input
-for d in range(1):
+for d in range(2):
 	print("epoch: " + str(d))
 	np.random.shuffle(all_datasets)
 	for i in range(len(all_datasets)):
 		# model.fit(all_datasets[i]['input_dataset'], all_datasets[i]['comparison_dataset'], nb_epoch=1, batch_size=1, verbose=1)
-		model.fit(all_datasets[i]['input_dataset'][:100], all_datasets[i]['comparison_dataset'][:100], nb_epoch=1, batch_size=1, verbose=1)
+		model.fit(all_datasets[i]['input_dataset'], all_datasets[i]['comparison_dataset'], nb_epoch=1, batch_size=1, verbose=1)
 
 
 #if user inputs filename, exec, otherwise, default output_file.wav
@@ -70,8 +70,8 @@ else:
 	audio_output = wave.open('output_file.wav', 'wb')
 
 # set output length to a reusable variable
-output_length = 100
-seed_length = look_back + 1 
+output_length = 300000
+seed_length = look_back + 256
 
 #ensure output file is same format as a input file
 audio_output.setparams(all_datasets[0]['file_params'])
@@ -96,7 +96,7 @@ output_frames = []
 
 # For n times generate a random frame
 for i in range(output_length):
-	if i % 5000 == 0:
+	if i % 1000 == 0:
 		print("on frame " + str(i) + " of " + str(output_length))
 
 	prediction = model.predict(generation_data, verbose=0)[:look_back]
