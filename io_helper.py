@@ -42,7 +42,7 @@ def select_files(input_path):
 #[id1, id2, id3]
 #[cd1, cd2, cd3]
 #[{'id': id1, 'cd': cd1, 'sc': sc1}, {'id': id2, 'cd': cd2,  'sc': sc2}]
-def files_to_data(file_list):
+def files_to_data(file_list, look_back):
 	data_dictionary_array = []
 	for i in range(len(file_list)): 
 		data_dictionary = dict()
@@ -51,7 +51,7 @@ def files_to_data(file_list):
 		scaler = MinMaxScaler(feature_range=(0,1))
 		data_dictionary['scaler'] = scaler
 		audio_dataset = data_dictionary['scaler'].fit_transform(audio_dataset)
-		input_data, comparison_data = create_dataset(audio_dataset)
+		input_data, comparison_data = create_dataset(audio_dataset, look_back)
 		data_dictionary['input_dataset'] = input_data
 		data_dictionary['comparison_dataset'] = comparison_data
 		data_dictionary['file_params'] = current_file.getparams() 
@@ -71,6 +71,6 @@ def reshape_datasets(all_datasets):
 	for i in range(len(all_datasets)):
 		all_datasets[i]['input_dataset'] = np.reshape(all_datasets[i]['input_dataset'], (all_datasets[i]['input_dataset'].shape[0], 1, all_datasets[i]['input_dataset'].shape[1]))
 	return all_datasets
-#training model randomizes data_set and trains each one
 
-
+def reshape_prediction(dataset):
+	return np.reshape(dataset, (dataset.shape[1], 1, dataset.shape[0]))
