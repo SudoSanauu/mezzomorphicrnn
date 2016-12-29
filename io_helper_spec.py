@@ -6,8 +6,8 @@ from io_helper import *
 
 class IOHelperTestCase(unittest.TestCase):
 
-	#testing get_data
-	#checking to see if we get something back
+	# testing get_data
+	# checking to see if we get something back
 	def test_get_audio(self):
 		input_file = wave.open('blip.wav','rb')
 		audio_input = get_data(input_file)
@@ -17,8 +17,8 @@ class IOHelperTestCase(unittest.TestCase):
 		self.assertEqual(type(audio_input[0][0]),type(1))
 		input_file.close()
 
-	#testing write_data
-	#put in simple data for it to write
+	# testing write_data
+	# put in simple data for it to write
 	def test_write_data(self):
 		input_file = wave.open('blip.wav','rb')
 		file_params = input_file.getparams()
@@ -31,7 +31,7 @@ class IOHelperTestCase(unittest.TestCase):
 		output_file.close()
 		os.remove('test_output_file.wav')
 
-	#read and write a file and compare
+	# read and write a file and compare
 	def test_read_to_write(self):
 		input_file = wave.open('blip.wav','rb')
 		file_params = input_file.getparams()
@@ -46,3 +46,18 @@ class IOHelperTestCase(unittest.TestCase):
 		audio_output = get_data(output_file)
 		audio_output = np.array(audio_input)
 		self.assertEqual(np.array_equal(audio_input,audio_output), True)
+
+	# testing select_files
+
+
+
+	# testing files_to_data
+
+
+	# testing create_dataset
+
+
+	# testing reshape_dataset
+
+
+	# testing reshape_predict
