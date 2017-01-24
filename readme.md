@@ -26,7 +26,17 @@ Run main.py using python3 with the arguments of the file you wish to train the n
 * *Input file can also be a folder. The netwrok will use all .wav files in the folder.*
 * *Output file name is optional. If excluded will be named output_file.wav by default*
 
-Training the network on 15 seconds of sound took aproxx 2 days on a laptop with a graphics card and output aproxx 3 seconds of sound.
+
+##Time Considerations
+Running this neural network on wav files in any significant length takes considerable processing(CPU/GPU) power and time. For example, a 15 second clip took about two days to train, convert, and generate a new clip on a typical laptop. 
+
+
+##Other Resources
+To see some other neural networks in action and for more information check this youtube [playlist](https://www.youtube.com/watch?v=b99UVkWzYTQ&list=PLjJh1vlSEYgvGod9wWiydumYl8hOXixNu) and [article](http://machinelearningmastery.com/best-machine-learning-resources-for-getting-started/) out. 
+For more information on recurrent neural networks, click [here](http://karpathy.github.io/2015/05/21/rnn-effectiveness/).
+For more information on keras, check the [docs](https://keras.io/).
+
+
 
 #Team
 * [Aaron Jacobson](https://github.com/SudoSanauu)
