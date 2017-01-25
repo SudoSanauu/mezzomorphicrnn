@@ -1,13 +1,15 @@
 #Mezzomorphic Recurrent Neural Network
 > Deep Learning Music Generator. 
 
+Mezzomorphic is a web application that uses Rails and Python to generate music via a recurrent neural network.
+
 This network is used in conjuction with a Rails Api [controller](https://github.com/louiehchen/mezzo_backend) and rails 5 Application [front-end](https://github.com/louiehchen/mezzo_frontend).
 
 
 The Mezzomorphic network trains on .wav files. It uses pattern recognition to output a set of bytes that create a brand new computer generated sound. 
 
 
-##Install
+##Installation
 ```
 pip3 install keras
 pip3 install sklearn
