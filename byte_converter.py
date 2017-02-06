@@ -24,4 +24,3 @@ def int_to_bytes(input_int, width):
 
 	int_array.reverse()
 	return bytes(int_array)
-
